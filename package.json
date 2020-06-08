@@ -1,0 +1,14 @@
+{
+  "name": "2359-test",
+  "version": "1.0.0",
+  "description": "This project purpose for 2359 take home test",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Rifki Rahadian",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
