@@ -1,7 +1,7 @@
 {
-  "name": "2359-test",
+  "name": "todo-app",
   "version": "1.0.0",
-  "description": "This project purpose for 2359 take home test",
+  "description": "To do apps",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
