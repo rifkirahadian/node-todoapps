@@ -1,3 +1,4 @@
+// knex configuration settting
 let environment = process.env.NODE_ENV
 let config = require('../knexfile')[environment]
 
