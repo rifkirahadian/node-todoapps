@@ -7,7 +7,8 @@ const authController = new AuthController
 module.exports = (app, express) => {
   const apiRoutes = express.Router()
 
-  apiRoutes.post('/register', authController.register)
+  apiRoutes.post('/register',validator.register, authController.register)
+  apiRoutes.post('/login',validator.login, authController.login)
 
-  app.use('/api',validator.register, apiRoutes)
+  app.use('/api', apiRoutes)
 }

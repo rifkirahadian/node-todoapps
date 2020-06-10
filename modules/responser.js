@@ -1,3 +1,4 @@
+//response for success status
 exports.successResponse = (res, data, message) => {
     return res.json({
         message: message ? [message] : null,
@@ -5,6 +6,7 @@ exports.successResponse = (res, data, message) => {
     })
 }
 
+//response for bad request
 exports.errorResponse = (res, message) => {
     return res.status(400).json({
         message: message ? [message] : null,
@@ -12,6 +14,15 @@ exports.errorResponse = (res, message) => {
     })
 }
 
+//response for custom error status
+exports.errorResponseStatus = (res, status, message) => {
+    return res.status(status).json({
+        message: message ? [message] : null,
+        data:null
+    })
+}
+
+//response for form validation error
 exports.formErrorValidationResponse = (errors, res) => {
     return res.status(400).json({
         message: errors.map(item => {
@@ -21,6 +32,7 @@ exports.formErrorValidationResponse = (errors, res) => {
     })
 }
 
+// handle error response from server or request
 exports.errorResponseHandle = (error, res) => {
     if (typeof error !== 'undefined') {
         let status = 500
