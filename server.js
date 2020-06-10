@@ -6,6 +6,9 @@ const bodyParser    = require('body-parser');
 
 app.use(bodyParser.json());
 
+//route list
+require('./routes/index')(app, express);
+
 const port = process.env.PORT;
 
 app.listen(port);

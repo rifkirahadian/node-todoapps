@@ -1,6 +1,7 @@
 const { validationResult, body } = require('express-validator')
-const responser = require('../configs/responser')
+const responser = require('./responser')
 
+//validation form handle
 exports.formValidate = (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -8,9 +9,11 @@ exports.formValidate = (req, res) => {
   }
 }
 
+//register validation
 exports.register = [
   body(['username']).notEmpty().withMessage('Username required'),
   body(['name']).notEmpty().withMessage('Name required'),
   body(['password']).notEmpty().withMessage('Password required'),
   body(['password_confirmation']).notEmpty().withMessage('Password Confirmation required'),
+  body(['password_confirmation']).custom((value, { req }) => value === req.body.password).withMessage('Password Confirmation must same with password'),
 ]
