@@ -16,6 +16,8 @@ class TaskController {
       let date = taskModules.dayCharacterConvert(day, res)
       time = taskModules.timeCharacterConvert(time)
       
+      await taskModules.clashTaskValidate(date,time, user_id, res)
+      
       await Task.create({
         name, 
         place, 

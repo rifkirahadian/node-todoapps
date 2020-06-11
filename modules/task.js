@@ -167,6 +167,19 @@ class TaskModules {
       }
     })
   }
+
+  async clashTaskValidate(date, start_time, user_id, res) {
+    try {
+      let task = await Task.where({date, start_time, user_id}).first()
+      if (task) {
+        task = task.toJSON()
+        throw responser.errorResponse(res, `Your task clashes with ${task.name}`)
+      }
+    } catch (error) {
+      
+    }
+    
+  }
 }
 
 module.exports = TaskModules
