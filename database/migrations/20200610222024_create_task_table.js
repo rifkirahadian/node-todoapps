@@ -10,6 +10,7 @@ exports.up = function (knex) {
       table.date('date').notNullable()
       table.time('start_time').notNullable()
       table.time('end_time')
+      table.text('words').notNullable()
       table.timestamps()
     })
 };

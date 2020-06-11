@@ -4,7 +4,7 @@ const responser = require('../modules/responser')
 module.exports = (authRoutes) => {
   authRoutes.use((req, res, next) => {
     // check header parameters for token
-    let token = req.headers['Authorization']
+    let token = req.headers['authorization']
 
     // decode token
     if (token) {

@@ -23,3 +23,7 @@ exports.login = [
   body(['username']).notEmpty().withMessage('Username required'),
   body(['password']).notEmpty().withMessage('Password required'),
 ]
+
+exports.createTask = [
+  body(['task']).notEmpty().withMessage('Task required'),
+]

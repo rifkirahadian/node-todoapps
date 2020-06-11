@@ -1,7 +1,7 @@
 const validator = require('../modules/validator')
 const responser = require('../modules/responser')
 const Auth = require('../modules/auth')
-
+    
 const auth = new Auth
 
 class AuthController {
