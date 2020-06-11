@@ -16,6 +16,7 @@ module.exports = (app, express) => {
   apiRoutes.post('/login',validator.login, authController.login)
 
   authRoutes.post('/task', validator.createTask, taskController.createTask)
+  authRoutes.get('/tasks/upcoming', taskController.upcomingTask)
 
   app.use('/api', apiRoutes)
   app.use('/api', authRoutes)

@@ -2,6 +2,7 @@ const Task = require('../models/Task')
 const appConfigs = require('../configs/times')
 const moment = require('moment')
 const responser = require('./responser')
+const knex = require('../configs/knex')
 
 class TaskModules {
   getTaskNameFromTaskSentence(task) {
@@ -92,8 +93,7 @@ class TaskModules {
             return moment().startOf('isoWeek').add(1, 'week').day(dayName).format('YYYY-MM-DD')
           break;
             
-          default:
-            break;
+          default: break;
         }
       break;
     }
@@ -109,6 +109,63 @@ class TaskModules {
     }
 
     return `${timeNumber}:00:00`
+  }
+
+  async getUpcomingTasksDate(user_id) {
+    const today = moment().format('YYYY-MM-DD')
+    let tasksDate = await knex('tasks').where({user_id}).where('date', '>=', today).select('date').groupBy('date')
+    
+    return tasksDate.map(item => {
+      return moment(item.date).format('YYYY-MM-DD')
+    })
+  }
+
+  async getUpcomingTasksByDate(tasksDate, user_id) {
+    const today = moment().format('YYYY-MM-DD')
+    
+    let tasksQuery = tasksDate.map(item => {
+      return Task.where({user_id, date:item}).get()
+    })
+
+    let tasks = await Promise.all(tasksQuery)
+    return tasks.map((item, key) => {
+      item = item.toJSON()
+
+      return {
+        date: moment(tasksDate[key]).format('MMM DD, YYYY'),
+        tasks: item.map(task => {
+          return `@${moment(`${today} ${task.start_time}`).format('ha')}, ${task.place}, ${task.name}`
+        })
+      }
+    })
+  }
+
+  async getUpcomingTasksPlaces(user_id) {
+    const today = moment().format('YYYY-MM-DD')
+    let tasksPlace = await knex('tasks').where({user_id}).where('date', '>=', today).select('place').groupBy('place')
+    
+    return tasksPlace.map(item => {
+      return item.place
+    })
+  }
+
+  async getUpcomingTasksByPlace(tasksPlace, user_id) {
+    let tasksQuery = tasksPlace.map(item => {
+      return Task.where({user_id, place:item}).get()
+    })
+
+    let tasks = await Promise.all(tasksQuery)
+    return tasks.map((item, key) => {
+      item = item.toJSON()
+
+      return {
+        place: tasksPlace[key],
+        tasks: item.map(task => {
+          let date = moment(task.date).format('YYYY-MM-DD')
+          return `${moment(`${date} ${task.start_time}`).format('MMM DD, YYYY @ha')}, ${task.name}`
+        })
+      }
+    })
   }
 }
 
