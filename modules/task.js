@@ -1,8 +1,10 @@
 const Task = require('../models/Task')
-const appConfigs = require('../configs/times')
+const timeConfig = require('../configs/times')
+const wordConfig = require('../configs/words')
 const moment = require('moment')
 const responser = require('./responser')
 const knex = require('../configs/knex')
+const RecurringTask = require('../models/RecurringTask')
 
 class TaskModules {
   getTaskNameFromTaskSentence(task) {
@@ -26,7 +28,7 @@ class TaskModules {
   }
 
   getPlaceAndTimeFromTaskSentence(task, name) {
-    let daysWordPossible = appConfigs.daysWordPossible
+    let daysWordPossible = timeConfig.daysWordPossible
     let placeTime = task.replace(`${name} at `, "")
 
     let placesTimes = placeTime.split(' ')
@@ -108,6 +110,8 @@ class TaskModules {
       var timeNumber = parseInt(time.replace('pm')) + 12
     }
 
+    timeNumber = timeNumber > 9 ? timeNumber : `0${timeNumber}`
+
     return `${timeNumber}:00:00`
   }
 
@@ -178,7 +182,185 @@ class TaskModules {
     } catch (error) {
       
     }
+  }
+
+  checkDateExistOnSentence(task) {
+    let {monthsNumber, months} = timeConfig
     
+    let taskWords = task.split(' ')
+    let day = null
+    let month = null
+    taskWords.forEach((item, key) => {
+      if (months.indexOf(item.toLowerCase()) >= 0) {
+        month = item.toLowerCase()
+      }
+
+      if ((month !== null) && (key > 0) &&(day === null)) {
+        let date = parseInt(taskWords[key-1])
+        if (date) {
+          day = date
+        }
+      }
+    })
+
+    if (day !== null) {
+      let dateWord = `${day} ${month}`
+      month = monthsNumber[month]
+
+      return {month, day, dateWord}
+    }else{
+      return null
+    }
+  }
+
+  getTaskNameRecurringTaskDate(task, dateWord) {
+    task = task.replace(dateWord, '')
+    task = this.removeConjuntionFromSentence(task)
+
+    return task
+  }
+
+  removeConjuntionFromSentence(word) {
+    const {conjunctions} = wordConfig
+    conjunctions.forEach(element => {
+      word = word.replace(` ${element} `, '')
+    })
+
+    return word
+  }
+
+  async createRecurringTaskDateType(dateObject, name, user_id, words) {
+    let date = `2020-${dateObject.month}-${dateObject.day}`
+    let type = 'every_year'
+    let start_time = null
+    let end_time = null
+
+    let recurringTask = await RecurringTask.create({
+      user_id, name, words, date, type, start_time, end_time
+    })
+
+    return recurringTask.toJSON()
+  }
+
+  getNextDateTaskRecurring(date, type) {
+    const today = moment().format('YYYY-MM-DD')
+
+    switch (type) {
+      case 'every_year':
+        var timeUnit = 'year'
+      break;
+
+      case 'every_day':
+      var timeUnit = 'day'
+      break;
+    
+      default:
+        var timeUnit = 'day'
+      break;
+    }
+
+    if (moment(today).isAfter(date)) {
+      return moment(date).add(1, timeUnit).format('YYYY-MM-DD')
+    }else{
+      return date
+    }
+  }
+
+  async setTaskFromRecurring(recurringTask, date) {
+    let {user_id, name, words, start_time, end_time} = recurringTask
+    await Task.create({
+      user_id,
+      name,
+      words,
+      date,
+      start_time: start_time ? start_time : '00:00:00',
+      end_time
+    })
+  }
+
+  dailyRecurringTaskCheck(task) {
+    let {dailyRecurringTaskWord} = wordConfig
+    let taskWords = task.split(' ')
+    let isDailyRecurringTask = null
+
+    taskWords.forEach((item, key) => {
+      if (dailyRecurringTaskWord.indexOf(item) >= 0) {
+        isDailyRecurringTask = true
+      }
+      
+      if (key > 0) {
+        let word = `${taskWords[key-1]} ${item}`
+        if (dailyRecurringTaskWord.indexOf(word.toLocaleLowerCase()) >= 0) {
+          isDailyRecurringTask = word
+        }
+      }
+    });
+    
+    return isDailyRecurringTask
+  }
+
+  timeLengthCheck(task) {
+    let {timeLength} = timeConfig
+    let taskWords = task.split(' ')
+    
+    let timeLengthWord = null
+
+    taskWords.forEach((item, key) => {
+      if ((timeLength.unit.indexOf(item) >= 0) && (key > 0)) {
+        let timeLengthValue = parseInt(taskWords[key-1])
+        if (timeLengthValue) {
+          timeLengthWord = `${taskWords[key-1]} ${item}`
+        }
+      }
+    })
+
+    return timeLengthWord
+  }
+
+  startTimeCheck(task) {
+    let taskWords = task.split(' ')
+    let time = null
+    taskWords.forEach(item => {
+      if (this.isValidTimeFormat(item)) {
+        time = item
+      }
+    })
+
+    return time
+  }
+
+  getTaskNameRecurringTaskDaily(dailyRecurringWord, timeLength, startTime, task) {
+    let dailyRecurringWordIndex = task.indexOf(dailyRecurringWord)
+    let timeLengthIndex = task.indexOf(timeLength)
+    let startTimeIndex = task.indexOf(startTime)
+
+    let minimumIndex = Math.min.apply(Math, [dailyRecurringWordIndex, timeLengthIndex, startTimeIndex])
+
+    let name = task.substr(0,minimumIndex)
+    name = this.removeConjuntionFromSentence(name)
+    
+    return name
+  }
+
+  getEndTimeFromTimeLength(startTime, timeLength) {
+    let parseTimeLength = timeLength.split(' ')
+    let {unitValue, unit} = timeConfig.timeLength
+    let unitIndex = unit.indexOf(parseTimeLength[1])
+    let timeUnit = unitValue[unitIndex]
+
+    let endTime = moment(`2020-01-01 ${startTime}`).add(parseTimeLength[0], timeUnit).format('HH:mm:ss')
+
+    return endTime
+  }
+
+  async createRecurringTaskDailyType(user_id, name, words, start_time, end_time) {
+    let date = moment().format('YYYY-MM-DD')
+    let type = 'every_day'
+    let recurringTask = await RecurringTask.create({
+      user_id, name, words, date, type, start_time, end_time
+    })
+
+    return recurringTask.toJSON()
   }
 }
 

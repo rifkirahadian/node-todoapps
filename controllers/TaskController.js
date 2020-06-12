@@ -15,7 +15,7 @@ class TaskController {
       let {day, time, place, name} = await taskModules.parseTaskSentence(task)
       let date = taskModules.dayCharacterConvert(day, res)
       time = taskModules.timeCharacterConvert(time)
-      
+
       await taskModules.clashTaskValidate(date,time, user_id, res)
       
       await Task.create({
@@ -47,6 +47,40 @@ class TaskController {
       }
 
       return responser.successResponse(res, tasks, null)
+    } catch (error) {
+      return responser.errorResponseHandle(error, res)
+    }
+  }
+
+  async createRecurringTask(req, res) {
+    try {
+      validator.formValidate(req, res)
+      let {task} = req.body
+      let user_id = req.user.id
+
+      let date = taskModules.checkDateExistOnSentence(task)
+      let dailyRecurringWord = taskModules.dailyRecurringTaskCheck(task)
+      let timeLength = taskModules.timeLengthCheck(task)
+      let startTime = taskModules.startTimeCheck(task)
+      
+      if (date !== null) {
+        let name = taskModules.getTaskNameRecurringTaskDate(task, date.dateWord)
+
+        let recurringTask = await taskModules.createRecurringTaskDateType(date, name, user_id, task)
+        let nextDate = taskModules.getNextDateTaskRecurring(recurringTask.date, recurringTask.type)
+        
+        await taskModules.setTaskFromRecurring(recurringTask, nextDate)
+      }else if((dailyRecurringWord !== null) && (startTime !== null)){
+        let name = taskModules.getTaskNameRecurringTaskDaily(dailyRecurringWord, timeLength, startTime, task)
+        startTime = taskModules.timeCharacterConvert(startTime)
+        let endTime = taskModules.getEndTimeFromTimeLength(startTime, timeLength)
+
+        let recurringTask = await taskModules.createRecurringTaskDailyType(user_id, name, task, startTime, endTime)
+        let nextDate = taskModules.getNextDateTaskRecurring(recurringTask.date, recurringTask.type)
+        await taskModules.setTaskFromRecurring(recurringTask, nextDate)
+      }
+      
+      return responser.successResponse(res, null, 'Recurring Task Created')
     } catch (error) {
       return responser.errorResponseHandle(error, res)
     }

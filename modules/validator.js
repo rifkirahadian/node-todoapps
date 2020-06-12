@@ -24,6 +24,6 @@ exports.login = [
   body(['password']).notEmpty().withMessage('Password required'),
 ]
 
-exports.createTask = [
+exports.createTaskSingleString = [
   body(['task']).notEmpty().withMessage('Task required'),
 ]
