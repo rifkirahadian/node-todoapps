@@ -23,8 +23,8 @@ for (let index = 0; index < 12; index++) {
 
 let daysWordPossible = ['tomorrow']
 daysName.forEach(item => {
-  daysWordPossible.push(`this ${item}`)
-  daysWordPossible.push(`next ${item}`)
+  daysWordPossible.push(`this ${item.toLowerCase()}`)
+  daysWordPossible.push(`next ${item.toLowerCase()}`)
 })
 
 module.exports = { daysName, daysWordPossible, months, monthsNumber, timeLength }
