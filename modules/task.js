@@ -259,7 +259,7 @@ class TaskModules {
       break;
     }
 
-    if (moment(today).isAfter(date)) {
+    if (moment(today).isSameOrAfter(date)) {
       return moment(date).add(1, timeUnit).format('YYYY-MM-DD')
     }else{
       return date
@@ -362,6 +362,35 @@ class TaskModules {
     })
 
     return recurringTask.toJSON()
+  }
+
+  async updateUpcomingTaskByRows(recurringTask) {
+    const today = moment().format('YYYY-MM-DD')
+    const now = moment().format('HH:mm:ss')
+
+    try {
+      await Task.where({recurring_task_id: recurringTask.id})
+        .where(q => {
+          q.where('date', '>', today)
+          .orWhere(q1 => {
+            q1.where({date:today}).where('start_time', '>', now)
+          })
+        }).first()
+    } catch (error) {
+      let nextDate = this.getNextDateTaskRecurring(recurringTask.date, recurringTask.type)
+      await this.setTaskFromRecurring(recurringTask, nextDate)
+    }
+  }
+
+  async updateUpcomingTaskOfRecurringTasks() {
+    let recurringTasks = await RecurringTask.get()
+    recurringTasks = recurringTasks.toJSON()
+
+    let upcomingTasksQueries = recurringTasks.map(item => {
+      return this.updateUpcomingTaskByRows(item)
+    })
+
+    await Promise.all(upcomingTasksQueries)
   }
 }
 
