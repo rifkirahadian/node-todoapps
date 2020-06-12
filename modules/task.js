@@ -274,7 +274,8 @@ class TaskModules {
       words,
       date,
       start_time: start_time ? start_time : '00:00:00',
-      end_time
+      end_time,
+      recurring_task_id: recurringTask.id
     })
   }
 

@@ -5,6 +5,8 @@ exports.up = function (knex) {
       table.increments('id')
       table.integer('user_id').unsigned().notNullable();
       table.foreign('user_id').references('id').inTable('users')
+      table.integer('recurring_task_id').unsigned();
+      table.foreign('recurring_task_id').references('id').inTable('recurring_tasks')
       table.string('name', 150).notNullable()
       table.string('place', 150)
       table.date('date').notNullable()
