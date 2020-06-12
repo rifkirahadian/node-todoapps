@@ -7,9 +7,24 @@ const knex = require('../configs/knex')
 const RecurringTask = require('../models/RecurringTask')
 
 class TaskModules {
-  getTaskNameFromTaskSentence(task) {
-    let characters = task.split(' at ')
-    return characters[0]
+  getTaskNameAndPlaceFromTaskSentence(task, day, time) {
+    let newSentence = task.toLowerCase().replace(day, '')
+    newSentence = newSentence.replace(time, '')
+
+    let [name, place] = [null, null]
+    const {conjunctions} = wordConfig
+
+    conjunctions.forEach(item => {
+      let characters = newSentence.split(` ${item} `)
+      if (characters.length > 1) {
+        name = characters[0]
+        place = characters[1]
+      }
+    })
+    
+    name = (name === null ? newSentence : name).trim()
+
+    return {name, place}
   }
 
   isValidTimeFormat(char) {
@@ -27,20 +42,19 @@ class TaskModules {
     return validTime
   }
 
-  getPlaceAndTimeFromTaskSentence(task, name) {
+  getPlaceAndTimeFromTaskSentence(placeTime) {
     let daysWordPossible = timeConfig.daysWordPossible
-    let placeTime = task.replace(`${name} at `, "")
 
-    let placesTimes = placeTime.split(' ')
+    let sentences = placeTime.split(' ')
     
-    let [place, day, time] = [null, null, null];
-    placesTimes.forEach((item, key) => {
-      if (daysWordPossible.indexOf(item) >= 0) {
-        day = item
+    let [day, time] = [null, null, null];
+    sentences.forEach((item, key) => {
+      if (daysWordPossible.indexOf(item.toLocaleLowerCase()) >= 0) {
+        day = item.toLocaleLowerCase()
       }
 
-      if (((key+1) < placesTimes.length) && (day === null)) {
-        let char = `${item} ${placesTimes[key+1]}`
+      if (((key+1) < sentences.length) && (day === null)) {
+        let char = `${item} ${sentences[key+1]}`
         if (daysWordPossible.indexOf(char) >= 0) {
           day = char
         }
@@ -51,23 +65,14 @@ class TaskModules {
       }
     })
 
-    let dayIndex = placeTime.indexOf(day)
-    let timeIndex = placeTime.indexOf(time)
-
-    if (dayIndex > timeIndex) {
-      place = placeTime.substr(0, timeIndex-1)
-    }else{
-      place = placeTime.substr(0, dayIndex-1)
-    }
-
-    return {place, day, time}
+    return {day, time}
   }
 
   parseTaskSentence(task) {
-    let name = this.getTaskNameFromTaskSentence(task)
-    let {place, day, time} = this.getPlaceAndTimeFromTaskSentence(task, name)
+    let {day, time} = this.getPlaceAndTimeFromTaskSentence(task)
+    let {name, place} = this.getTaskNameAndPlaceFromTaskSentence(task, day, time)
 
-    return {name, place, day, time}
+    return {name, day, time, place}
   }
 
   dayCharacterConvert(day, res) {

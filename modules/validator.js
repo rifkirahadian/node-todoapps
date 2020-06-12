@@ -27,3 +27,7 @@ exports.login = [
 exports.createTaskSingleString = [
   body(['task']).notEmpty().withMessage('Task required'),
 ]
+
+exports.createSequentialTaskSingleString = [
+  body(['tasks']).notEmpty().withMessage('Tasks required'),
+]

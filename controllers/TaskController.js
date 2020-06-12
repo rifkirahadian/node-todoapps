@@ -12,12 +12,12 @@ class TaskController {
       let {task} = req.body
       let user_id = req.user.id
 
-      let {day, time, place, name} = await taskModules.parseTaskSentence(task)
+      let {day, time, place, name} = taskModules.parseTaskSentence(task)
       let date = taskModules.dayCharacterConvert(day, res)
       time = taskModules.timeCharacterConvert(time)
-
-      await taskModules.clashTaskValidate(date,time, user_id, res)
       
+      await taskModules.clashTaskValidate(date,time, user_id, res)
+
       await Task.create({
         name, 
         place, 
@@ -81,6 +81,47 @@ class TaskController {
       }
       
       return responser.successResponse(res, null, 'Recurring Task Created')
+    } catch (error) {
+      return responser.errorResponseHandle(error, res)
+    }
+  }
+
+  async createSequentialTask(req, res) {
+    try {
+      validator.formValidate(req, res)
+      let user_id = req.user.id
+      let {tasks} = req.body
+
+      let taskFields = tasks.map(item => {
+        return taskModules.parseTaskSentence(item)
+      })
+      let day = taskFields[0].day
+
+      taskFields = taskFields.map(item => {
+        item.date = taskModules.dayCharacterConvert(day, res)
+        item.time = taskModules.timeCharacterConvert(item.time)
+        return item
+      })
+      
+      let clashesValidates = taskFields.map(item => {
+        return taskModules.clashTaskValidate(item.date,item.time, user_id, res)
+      })
+      await Promise.all(clashesValidates)
+
+      let createTaskQueries = taskFields.map((item, key) => {
+        return Task.create({
+          name: item.name, 
+          place: item.place, 
+          date: item.date, 
+          start_time:item.time, 
+          user_id, 
+          words: tasks[key]
+        })
+      })
+
+      await Promise.all(createTaskQueries)
+
+      return responser.successResponse(res, null, 'Sequential Task Created')
     } catch (error) {
       return responser.errorResponseHandle(error, res)
     }
