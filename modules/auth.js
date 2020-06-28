@@ -8,7 +8,7 @@ class Auth {
     try {
       password = bcrypt.hashSync(password)
 
-      await User.create({ name, username, password })
+      return await User.create({ name, username, password })
     } catch (error) {
       throw responser.errorResponse(res, error.sqlMessage)
     }

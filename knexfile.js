@@ -21,7 +21,7 @@ module.exports = {
     }
   },
 
-  staging: {
+  test: {
     client: process.env.DB_SERVER,
     connection: {
       host: process.env.DB_HOST,

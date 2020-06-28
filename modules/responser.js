@@ -8,18 +8,30 @@ exports.successResponse = (res, data, message) => {
 
 //response for bad request
 exports.errorResponse = (res, message) => {
-    return res.status(400).json({
-        message: message ? [message] : null,
-        data:null
-    })
+    const environment = process.env.NODE_ENV
+    if (environment !== 'test') {
+        return res.status(400).json({
+            message: message ? [message] : null,
+            data:null
+        })
+    }else{
+        return message
+    }
+    
 }
 
 //response for custom error status
 exports.errorResponseStatus = (res, status, message) => {
-    return res.status(status).json({
-        message: message ? [message] : null,
-        data:null
-    })
+    const environment = process.env.NODE_ENV
+    if (environment !== 'test') {
+        return res.status(status).json({
+            message: message ? [message] : null,
+            data:null
+        })
+    }else{
+        return message
+    }
+    
 }
 
 //response for form validation error
@@ -40,10 +52,15 @@ exports.errorResponseHandle = (error, res) => {
             status = (error.status ? error.status : 500)
         }
         
-        return res.status(status).json({
-            message: [error.message],
-            data: null
-        })
+        try {
+            return res.status(status).json({
+                message: [error.message],
+                data: null
+            })
+        } catch (error) {
+            console.log('eror', error.message)
+        }
+        
     } else {
         return error
     }
