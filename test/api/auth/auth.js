@@ -30,4 +30,11 @@ describe('POST /Login', () => {
       
     expect(validatePassword).to.equal(true);
   })
+
+  it('get auth token', async () => {
+    let user = users[0]
+    let token = auth.generateAuthToken(user)
+      
+    expect(token).to.be.a('string')
+  })
 })
