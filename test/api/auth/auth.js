@@ -10,7 +10,7 @@ const bcrypt = require("bcrypt-nodejs")
 const {users} = require('../../data/auth')
 tracker.install();
 
-describe('POST /Login', () => {
+describe('POST /Login (success)', () => {
   before(() => {
     tracker.on('query', (query) => {
       const results = users;
@@ -36,5 +36,23 @@ describe('POST /Login', () => {
     let token = auth.generateAuthToken(user)
       
     expect(token).to.be.a('string')
+  })
+})
+
+describe('POST /Login (failed)', () => {
+  before(() => {
+    tracker.on('query', (query) => {
+      const results = users;
+      query.response(results);
+    });
+  });
+
+  it('validate user password (failed)', async () => {
+    try {
+      let password = bcrypt.hashSync('123')
+      await auth.validatePasswordLogin(password, '1234', {})
+    } catch (error) {
+      expect(error).to.eql('Wrong Password');
+    }
   })
 })
