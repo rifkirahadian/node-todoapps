@@ -27,6 +27,8 @@ class Auth {
     if (!bcrypt.compareSync(passwordInput, userPassword)) {
       throw responser.errorResponseStatus(res, 401, 'Wrong Password')
     }
+
+    return true
   }
 
   generateAuthToken(user) {

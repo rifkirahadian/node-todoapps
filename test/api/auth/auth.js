@@ -5,6 +5,7 @@ const Auth = require('../../../modules/auth')
 const mockKnex = require('mock-knex');
 const tracker = mockKnex.getTracker();
 const auth = new Auth
+const bcrypt = require("bcrypt-nodejs")
 
 const {users} = require('../../data/auth')
 tracker.install();
@@ -21,5 +22,12 @@ describe('POST /Login', () => {
     let user = await auth.getUserFromUsername('rifki', {})
       
     expect(user).to.have.property('username', 'rifki')
-  });
+  })
+
+  it('validate user password', async () => {
+    let password = bcrypt.hashSync('123')
+    let validatePassword = await auth.validatePasswordLogin(password, '123', {})
+      
+    expect(validatePassword).to.equal(true);
+  })
 })
