@@ -49,8 +49,8 @@ class TaskModules {
     
     let [day, time] = [null, null, null];
     sentences.forEach((item, key) => {
-      if (daysWordPossible.indexOf(item.toLocaleLowerCase()) >= 0) {
-        day = item.toLocaleLowerCase()
+      if (daysWordPossible.indexOf(item.toLowerCase()) >= 0) {
+        day = item.toLowerCase()
       }
 
       if (((key+1) < sentences.length) && (day === null)) {

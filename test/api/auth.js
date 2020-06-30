@@ -1,13 +1,13 @@
 process.env.NODE_ENV = 'test';
 
 const expect = require('chai').expect
-const Auth = require('../../../modules/auth')
+const Auth = require('../../modules/auth')
 const mockKnex = require('mock-knex');
 const tracker = mockKnex.getTracker();
 const auth = new Auth
 const bcrypt = require("bcrypt-nodejs")
 
-const {users} = require('../../data/auth')
+const {users} = require('../data/auth')
 tracker.install();
 
 describe('POST /Login (success)', () => {
@@ -54,5 +54,22 @@ describe('POST /Login (failed)', () => {
     } catch (error) {
       expect(error).to.eql('Wrong Password');
     }
+  })
+})
+
+describe('POST /register (success)', () => {
+  before(() => {
+    tracker.on('query', (query) => {
+      const results = users;
+      query.response(results);
+    });
+  });
+
+  it('user register', async () => {
+    let user = await auth.setRegister('rifki', 'rifki rahadian', '123', {})
+    let userAttribute = user.attributes
+    
+    expect(userAttribute).to.have.property('username', 'rifki')
+    expect(userAttribute).to.have.property('name', 'rifki rahadian')
   })
 })
