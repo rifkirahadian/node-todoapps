@@ -283,22 +283,22 @@ class TaskModules {
   dailyRecurringTaskCheck(task) {
     let {dailyRecurringTaskWord} = wordConfig
     let taskWords = task.split(' ')
-    let isDailyRecurringTask = null
+    let dailyRecurringWord = null
 
     taskWords.forEach((item, key) => {
       if (dailyRecurringTaskWord.indexOf(item) >= 0) {
-        isDailyRecurringTask = true
+        dailyRecurringWord = item
       }
       
-      if (key > 0) {
+      if ((key > 0)) {
         let word = `${taskWords[key-1]} ${item}`
         if (dailyRecurringTaskWord.indexOf(word.toLocaleLowerCase()) >= 0) {
-          isDailyRecurringTask = word
+          dailyRecurringWord = word
         }
       }
     });
     
-    return isDailyRecurringTask
+    return dailyRecurringWord
   }
 
   timeLengthCheck(task) {

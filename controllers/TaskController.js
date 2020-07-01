@@ -63,6 +63,7 @@ class TaskController {
       let timeLength = taskModules.timeLengthCheck(task)
       let startTime = taskModules.startTimeCheck(task)
       
+      //annualy recurring
       if (date !== null) {
         let name = taskModules.getTaskNameRecurringTaskDate(task, date.dateWord)
 
@@ -70,7 +71,9 @@ class TaskController {
         let nextDate = taskModules.getNextDateTaskRecurring(recurringTask.date, recurringTask.type)
         
         await taskModules.setTaskFromRecurring(recurringTask, nextDate)
+        
       }else if((dailyRecurringWord !== null) && (startTime !== null)){
+        //every day recurring
         let name = taskModules.getTaskNameRecurringTaskDaily(dailyRecurringWord, timeLength, startTime, task)
         startTime = taskModules.timeCharacterConvert(startTime)
         let endTime = taskModules.getEndTimeFromTimeLength(startTime, timeLength)
