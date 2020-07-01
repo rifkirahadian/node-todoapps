@@ -18,7 +18,7 @@ class TaskModules {
       let characters = newSentence.split(` ${item} `)
       if (characters.length > 1) {
         name = characters[0]
-        place = characters[1]
+        place = characters[1].trim()
       }
     })
     
@@ -42,7 +42,7 @@ class TaskModules {
     return validTime
   }
 
-  getPlaceAndTimeFromTaskSentence(placeTime) {
+  getDateAndTimeFromTaskSentence(placeTime) {
     let daysWordPossible = timeConfig.daysWordPossible
 
     let sentences = placeTime.split(' ')
@@ -69,7 +69,7 @@ class TaskModules {
   }
 
   parseTaskSentence(task) {
-    let {day, time} = this.getPlaceAndTimeFromTaskSentence(task)
+    let {day, time} = this.getDateAndTimeFromTaskSentence(task)
     let {name, place} = this.getTaskNameAndPlaceFromTaskSentence(task, day, time)
 
     return {name, day, time, place}
